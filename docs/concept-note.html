@@ -1,0 +1,206 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Setu · Concept Note · Team MedNova</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 13mm 14mm 13mm 14mm; }
+  :root { --ink:#1a2b33; --muted:#5e7079; --teal:#0e7c86; --teal-dark:#0b4f5c; --tint:#eaf3f4; --saffron:#e59a2f; --saffron-l:#fbe3bd; --alert:#c4513a; --line:#d9e3e6; }
+  * { box-sizing: border-box; }
+  body { font-family: Inter, Calibri, Arial, sans-serif; color: var(--ink); font-size: 9.8pt; line-height: 1.42; margin: 0; background: #fff; }
+  h1, h2 { font-family: "Source Serif 4", Cambria, Georgia, serif; color: var(--teal-dark); }
+  h1 { font-size: 26pt; margin: 0; line-height: 1.1; }
+  h2 { font-size: 14pt; margin: 18px 0 6px; break-after: avoid; }
+  h3 { font-size: 10.5pt; margin: 10px 0 4px; color: var(--teal); }
+  p { margin: 4px 0 6px; }
+  ul { margin: 4px 0 6px; padding-left: 18px; }
+  li { margin: 2px 0; }
+  a { color: var(--teal); }
+  .hero { background: var(--teal-dark); color: #fff; padding: 18px 20px; border-radius: 10px; }
+  .hero h1 { color: #fff; }
+  .hero .kicker { color: var(--saffron); font-weight: 700; letter-spacing: .12em; font-size: 8.5pt; text-transform: uppercase; }
+  .hero .tag { color: var(--saffron-l); font-style: italic; font-size: 12pt; margin-top: 6px; }
+  .meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+  .meta div { background: rgba(255,255,255,.1); border-radius: 6px; padding: 6px 8px; font-size: 8.5pt; }
+  .meta b { display: block; color: var(--saffron-l); font-size: 7.5pt; letter-spacing: .06em; text-transform: uppercase; }
+  .links { font-size: 8.8pt; margin-top: 8px; color: #cfe5e7; }
+  .links a { color: #fff; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0; }
+  .stat { background: var(--tint); border-radius: 8px; padding: 10px 12px; }
+  .stat .n { font-family: "Source Serif 4", Cambria, serif; font-size: 22pt; font-weight: 700; color: var(--teal-dark); line-height: 1; }
+  .stat .n.red { color: var(--alert); }
+  .stat .l { font-size: 8.6pt; color: var(--ink); margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 9pt; break-inside: avoid; }
+  th { text-align: left; background: var(--tint); color: var(--teal-dark); padding: 5px 7px; font-size: 8.4pt; text-transform: uppercase; letter-spacing: .03em; }
+  td { padding: 5px 7px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 8px 0; }
+  .loop div { border: 1.5px solid var(--teal); border-radius: 8px; padding: 7px 8px; font-size: 8.6pt; }
+  .loop b { display: block; color: var(--teal-dark); font-size: 10pt; margin-bottom: 2px; }
+  .loop div.hl { border-color: var(--saffron); background: #fff8ec; }
+  .callout { background: var(--saffron-l); border-radius: 8px; padding: 8px 12px; margin: 8px 0; font-size: 9.4pt; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; break-inside: avoid; }
+  .arch { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 8px; margin: 8px 0; align-items: stretch; font-size: 8.6pt; }
+  .arch .col { border-radius: 8px; padding: 8px; background: var(--tint); }
+  .arch .col.mid { background: var(--teal-dark); color: #fff; }
+  .arch .col.mid h3 { color: var(--saffron-l); }
+  .arch h3 { margin-top: 0; }
+  .muted { color: var(--muted); font-size: 8.6pt; }
+  .never li::marker { content: "⊘  "; color: var(--alert); }
+  .loop, .stats, .arch, .two, .callout, tr { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  .foot { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 6px; font-size: 8pt; color: var(--muted); }
+  .refs { font-size: 8.4pt; }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="kicker">Health-a-thon 2026 · Round 1 · Team MedNova · Concept Note</div>
+  <h1>Setu: Cancer Treatment Dropout Recovery</h1>
+  <div class="tag">Reminders don't bring patients back. Removing their barrier does.</div>
+  <div class="meta">
+    <div><b>Track</b>Cancer</div>
+    <div><b>Primary user</b>Doctor / Care Team</div>
+    <div><b>Use case</b>Patient Follow-up &amp; Continuity of Care</div>
+    <div><b>Nature</b>Assistive · non-clinical</div>
+  </div>
+  <div class="links">Prototype: <a href="https://hannielvinu.github.io/Setu/">hannielvinu.github.io/Setu</a> &nbsp;·&nbsp; Code: <a href="https://github.com/hannielvinu/Setu">github.com/hannielvinu/Setu</a></div>
+</section>
+
+<h2>1. The problem</h2>
+<p>Long-term cancer care is a sequence of time-bound steps: chemotherapy cycles, radiotherapy fractions and reviews, and years of surveillance. Patients quietly drop out between these steps.</p>
+<div class="stats">
+  <div class="stat"><div class="n red">34%</div><div class="l">of cervical cancer patients who completed treatment were lost to follow-up (South India, n=690); 12% did not complete planned treatment [1]</div></div>
+  <div class="stat"><div class="n">19–50%</div><div class="l">treatment abandonment reported for paediatric AML across Indian centres [2]</div></div>
+  <div class="stat"><div class="n">&gt;100 km</div><div class="l">distance from the hospital: a consistently reported risk factor for loss to follow-up [1]</div></div>
+</div>
+<p><b>How it is handled today.</b> Coordinators and patient navigators (e.g. TMC's KEVAT programme [4]) search registers, spreadsheets and appointment lists by hand and cold-call patients. This works but does not scale, and <b>the reason a patient dropped out is rarely recorded</b>, so the cause is never fixed. Integrating with hospital software is costly (₹30–50 lakh per mid-sized facility for ABDM-compliant integration [3]), so any solution that needs EMR integration will not reach most hospitals.</p>
+
+<h2>2. The insight</h2>
+<p>Many dropouts are driven by <b>non-clinical barriers</b>: scheme (PM-JAY / state) paperwork, travel and lodging costs, family and caregiver duties, "I feel better", fear of side effects, or simply not knowing the next date. SMS reminders remove none of these. Patient apps miss the patients who have already gone silent. Human navigators help, but one person cannot reach every patient.</p>
+<div class="callout"><b>Gap Setu fills:</b> a hospital-run, assistive outreach loop that finds silent dropouts, learns <i>why</i> in the patient's own language, removes the barrier where it can, hands everything clinical to people, and gives the hospital its first data on why patients leave.</div>
+
+<h2>3. The solution: a closed loop</h2>
+<div class="loop">
+  <div><b>1 · Find</b>Clinician-defined pathway templates and simple rules flag overdue patients from existing exports or clerk-verified register photos.</div>
+  <div><b>2 · Reach</b>WhatsApp/SMS heads-up, then a consented voice call in the patient's language. Identity check before any disclosure.</div>
+  <div><b>3 · Understand</b>One question: "what is stopping you from coming?" The AI sorts the answer into a fixed barrier list.</div>
+  <div class="hl"><b>4 · Resolve</b>Rebook a vacant slot, send the scheme document checklist, share lodging help, copy the caregiver, or hand over to a person.</div>
+  <div><b>5 · Measure</b>Return-to-care tracking and a barrier dashboard so the hospital can fix root causes.</div>
+</div>
+<h3>Illustrative journey (synthetic)</h3>
+<p>Shanti, 52, chemo cycle 4 of 6, 9 days overdue, lives 140 km away. She is ranked #2 on the morning worklist (9 days × clinician tier 3 × 1.5 for one past miss). A WhatsApp heads-up arrives from the hospital care-desk number with a neutral sender name. A Hindi voice call follows; her son, a registered caregiver, confirms her birth year. Barrier captured: <i>"Ayushman card lapsed and the bus fare is too much."</i> Setu sends the scheme document checklist and lodging list, books Thursday's cancelled day-care slot, and the coordinator sees a one-line summary. All of this runs end to end in the prototype.</p>
+
+<h2>4. Scope compliance: assistive by design</h2>
+<table>
+  <tr><th style="width:30%">Out-of-scope item</th><th>How Setu stays outside it</th></tr>
+  <tr><td>Diagnosis</td><td>Setu never sees or infers a diagnosis. It works only from schedule facts (pathway, step, last visit date).</td></tr>
+  <tr><td>Treatment recommendations</td><td>Pathways are written by clinicians. Setu only reminds and rebooks what the doctor already planned.</td></tr>
+  <tr><td>Clinical decision support</td><td>The AI's only outputs are fixed non-clinical labels (money, paperwork, travel, lodging, family, felt better, worried, unaware, other).</td></tr>
+  <tr><td>Clinical risk scoring</td><td>Priority = days overdue × clinician-set tier × (1 + 0.5 × past misses). Operational, transparent, no model.</td></tr>
+  <tr><td>Interpretation of medical data</td><td>OCR extracts six non-clinical fields only: reg. no., name, phone, pathway, visit no., last visit date. No drugs, doses or values.</td></tr>
+  <tr><td>Autonomous clinical advice</td><td>Any symptom goes to a nurse queue verbatim, with no advice. Emergency-card phrases trigger the hospital's own printed instruction, read word for word, plus an on-call alert.</td></tr>
+</table>
+
+<div class="two">
+  <div class="box">
+    <h3>Safeguards built into the design</h3>
+    <ul>
+      <li><b>Human-verified data:</b> a clerk approves every digitised row; date, phone and name sanity checks block errors.</li>
+      <li><b>Privacy (DPDP):</b> consent at enrolment, neutral sender, identity check (birth year or card digits) before any detail; a wrong person hears only "please ask them to call back".</li>
+      <li><b>Fail-safe emergencies:</b> keyword OR LLM match on the hospital's emergency card triggers the path; ambiguous cases are treated as emergencies.</li>
+      <li><b>Nurse queue, not triage:</b> the nurse decides and chooses any leaflet, in about 30 seconds per item.</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>Telephony realities handled</h3>
+    <ul>
+      <li>Heads-up message 10 minutes before the call; verified business caller ID; DLT-registered SMS.</li>
+      <li>Calls only in the patient's preferred time window; at most 3 attempts.</li>
+      <li>"Say 'talk to a person' at any time" → warm transfer.</li>
+      <li>Fallback chain: call drop → WhatsApp voice notes → SMS + missed-call callback → human worklist.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>5. Architecture and technology</h2>
+<div class="arch">
+  <div class="col">
+    <h3>Data in (no EMR integration)</h3>
+    Appointment / day-care Excel or CSV exports<br>Register photos → 6-field OCR → clerk verification<br>Consent and caregiver details at enrolment
+  </div>
+  <div class="col mid">
+    <h3>Setu core</h3>
+    FastAPI + PostgreSQL<br>JSON pathway rule engine (clinician-owned)<br>LangGraph agent orchestration<br>Sarvam AI speech-to-text, text-to-speech and LLM (Hindi + regional), restricted to fixed labels<br>Emergency-card matcher (always on)
+  </div>
+  <div class="col">
+    <h3>Channels and people</h3>
+    Exotel voice and missed-call numbers<br>WhatsApp Business API (templates, Flows, voice notes)<br>React: worklist, verification, nurse queue, barrier dashboard
+  </div>
+</div>
+<p class="muted">Hosting: India-region, encrypted at rest and in transit, role-based access, audit log, transcript retention limits.</p>
+
+<h3>Prototype status (built and deployed)</h3>
+<table>
+  <tr><th style="width:28%">Component</th><th>In the prototype today</th><th style="width:32%">Next (pilot build)</th></tr>
+  <tr><td>Pathway engine and priority</td><td>Working; clinician tier edits re-rank live; unit-tested</td><td>Server-side, multi-hospital config</td></tr>
+  <tr><td>Outreach agent</td><td>Full flow: heads-up, call, identity check, barrier capture, rebooking, fallbacks (EN/HI), simulated in the browser</td><td>Sarvam voice + Exotel + WhatsApp API</td></tr>
+  <tr><td>Reply classifier</td><td>Transparent keyword rules (EN/HI/Hinglish), emergency card, exclusions</td><td>Sarvam LLM limited to the same labels; rules stay on</td></tr>
+  <tr><td>Register verification</td><td>Side-by-side review, confidence flags, sanity checks, CSV import</td><td>Live vision OCR on six fields</td></tr>
+  <tr><td>Nurse queue and dashboard</td><td>Working with synthetic baseline</td><td>Live hospital data</td></tr>
+</table>
+<p class="muted">All data in the prototype is synthetic; "Arogya Hospital" is fictional.</p>
+
+<h2>6. Impact and 60–90 day measurement</h2>
+<div class="two">
+  <div class="box">
+    <h3>Pilot design</h3>
+    <p>About 200 overdue patients at one partner hospital: Setu-supported outreach vs usual care.</p>
+    <p><b>Primary outcome:</b> % of overdue patients back in care within 30 days.</p>
+    <p><b>Secondary:</b> days to re-engagement; coordinator hours saved; call answer rate and fallback reach; identity-check pass rate; OCR correction rate; nurse-queue review time; emergency alerts and outcomes; barrier breakdown.</p>
+  </div>
+  <div class="box">
+    <h3>Who benefits</h3>
+    <ul>
+      <li><b>Doctors:</b> fewer silent dropouts, no extra screens.</li>
+      <li><b>Coordinators and nurses:</b> a ranked worklist and summaries instead of combing registers.</li>
+      <li><b>Patients and caregivers:</b> help with the real obstacle, in their language.</li>
+      <li><b>Hospital leadership:</b> first data on why patients leave, so causes get fixed.</li>
+    </ul>
+  </div>
+</div>
+<p><b>Scale.</b> Pathways are configuration, not code: chemotherapy, radiotherapy and surveillance first; the same engine runs high-risk pregnancy ANC schedules and diabetes review cycles (a maternal pathway is already configured in the prototype). Designed for rollout across National Cancer Grid institutions.</p>
+
+<h2>7. Risks and mitigations</h2>
+<table>
+  <tr><th style="width:30%">Risk</th><th>Mitigation</th></tr>
+  <tr><td>OCR misreads handwritten registers</td><td>Six fields only, confidence flags, sanity checks, mandatory clerk approval; correction rate tracked</td></tr>
+  <tr><td>Calls ignored or flagged as spam</td><td>Heads-up message, verified caller ID, preferred time windows, WhatsApp/SMS/missed-call fallback</td></tr>
+  <tr><td>Disclosure to the wrong person</td><td>Neutral sender, identity check before any detail, named caregivers from consent</td></tr>
+  <tr><td>Nurse queue overload</td><td>Batched queue with transcript + audio clip; no AI triage; review time measured; emergency path separate</td></tr>
+  <tr><td>LLM errors or made-up content</td><td>LLM only classifies into fixed labels; all speech is pre-approved scripts; deterministic scheduling; red-team suite of 100+ multilingual prompts (target: 0 advice, 0 missed emergency phrases)</td></tr>
+</table>
+
+<h2>8. Roadmap to the finale (28 Nov 2026)</h2>
+<table>
+  <tr><th style="width:16%">When</th><th>Milestone</th></tr>
+  <tr><td>Week 1</td><td>Field evidence: real dropout data from our doctor's department; coordinator and patient interviews; the hospital's emergency card</td></tr>
+  <tr><td>Weeks 2–4</td><td>Backend and live channels: pathway service, Sarvam voice, Exotel, WhatsApp templates, consent store</td></tr>
+  <tr><td>Week 5</td><td>Safety: red-team suite, nurse queue hardening; maternal pathway</td></tr>
+  <tr><td>Week 6</td><td>Consented mini-pilot (30–50 patients) with a partner hospital</td></tr>
+  <tr><td>Finale</td><td>Live call demo in an Indian language, fallback chain, barrier dashboard and pilot numbers</td></tr>
+</table>
+<p><b>Team MedNova</b> is doctor-led: our clinician designs the pathways, scripts and safety rules; our technologists build the agent, channels and dashboards.</p>
+
+<h3>References</h3>
+<ol class="refs">
+  <li>Loss to follow-up among cervical cancer patients, South India. PMC9199505. https://pmc.ncbi.nlm.nih.gov/articles/PMC9199505</li>
+  <li>Treatment abandonment in paediatric AML, India. Indian J Med Paediatr Oncol 2019. https://www.ijmpo.org/assets/articles/2019/pdf/ijmpo.ijmpo_84_18.pdf</li>
+  <li>From infrastructure to impact: operationalizing ABDM. HMPI, July 2026. https://hmpi.org/2026/07/09/from-infrastructure-to-impact-operationalizing-indias-ayushman-bharat-digital-mission/</li>
+  <li>KEVAT patient navigator programme, Tata Memorial Centre. https://tmc.gov.in/index.php/kevat-patient-navigator</li>
+</ol>
+<div class="foot">Setu is assistive: it does not diagnose, recommend treatment, provide clinical decision support, score clinical risk, interpret medical data or give clinical advice. Team MedNova · Health-a-thon 2026.</div>
+</body>
+</html>
