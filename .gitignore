@@ -9,3 +9,5 @@ dist/
 *.pptx
 ~$*
 SETU_PLAN.md
+.claude/
+/Setu_MedNova_*.pdf
