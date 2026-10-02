@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+
+# Local working files (pitch materials are submitted separately)
+*.pptx
+~$*
+SETU_PLAN.md

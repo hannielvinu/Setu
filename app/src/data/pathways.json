@@ -1,0 +1,63 @@
+{
+  "_comment": "Pathway templates are configuration written and owned by the clinical team. 'tier' is an operational follow-up urgency the clinician assigns to each step (1 = routine, 2 = important, 3 = time-critical). It is not a clinical risk score and is never computed by AI.",
+  "pathways": [
+    {
+      "id": "chemo_q21x6",
+      "domain": "Cancer",
+      "name": "Chemotherapy · 21-day cycle × 6",
+      "graceDays": 3,
+      "steps": [
+        { "id": "c1", "label": "Chemotherapy cycle 1", "dayOffset": 0, "tier": 3 },
+        { "id": "c2", "label": "Chemotherapy cycle 2", "dayOffset": 21, "tier": 3 },
+        { "id": "c3", "label": "Chemotherapy cycle 3", "dayOffset": 42, "tier": 3 },
+        { "id": "c4", "label": "Chemotherapy cycle 4", "dayOffset": 63, "tier": 3 },
+        { "id": "c5", "label": "Chemotherapy cycle 5", "dayOffset": 84, "tier": 3 },
+        { "id": "c6", "label": "Chemotherapy cycle 6", "dayOffset": 105, "tier": 3 },
+        { "id": "eot", "label": "End-of-treatment review", "dayOffset": 126, "tier": 2 }
+      ]
+    },
+    {
+      "id": "rt_course",
+      "domain": "Cancer",
+      "name": "Radiotherapy course with weekly reviews",
+      "graceDays": 1,
+      "steps": [
+        { "id": "sim", "label": "RT planning (simulation)", "dayOffset": 0, "tier": 3 },
+        { "id": "start", "label": "RT start", "dayOffset": 10, "tier": 3 },
+        { "id": "w1", "label": "Weekly RT review 1", "dayOffset": 17, "tier": 3 },
+        { "id": "w2", "label": "Weekly RT review 2", "dayOffset": 24, "tier": 3 },
+        { "id": "w3", "label": "Weekly RT review 3", "dayOffset": 31, "tier": 3 },
+        { "id": "w4", "label": "Weekly RT review 4", "dayOffset": 38, "tier": 3 },
+        { "id": "post", "label": "Post-RT review", "dayOffset": 75, "tier": 2 }
+      ]
+    },
+    {
+      "id": "surveillance",
+      "domain": "Cancer",
+      "name": "Post-treatment surveillance (2 years)",
+      "graceDays": 14,
+      "steps": [
+        { "id": "m3", "label": "Surveillance visit · 3 months", "dayOffset": 90, "tier": 2 },
+        { "id": "m6", "label": "Surveillance visit · 6 months", "dayOffset": 180, "tier": 2 },
+        { "id": "m9", "label": "Surveillance visit · 9 months", "dayOffset": 270, "tier": 1 },
+        { "id": "m12", "label": "Surveillance visit · 12 months", "dayOffset": 365, "tier": 1 },
+        { "id": "m18", "label": "Surveillance visit · 18 months", "dayOffset": 545, "tier": 1 },
+        { "id": "m24", "label": "Surveillance visit · 24 months", "dayOffset": 730, "tier": 1 }
+      ]
+    },
+    {
+      "id": "mch_hrp",
+      "domain": "Maternal & Child Health",
+      "name": "High-risk pregnancy ANC schedule (same engine, MCH config)",
+      "graceDays": 3,
+      "steps": [
+        { "id": "anc1", "label": "ANC visit 1", "dayOffset": 0, "tier": 3 },
+        { "id": "anc2", "label": "ANC visit 2", "dayOffset": 28, "tier": 3 },
+        { "id": "anc3", "label": "ANC visit 3", "dayOffset": 56, "tier": 3 },
+        { "id": "anc4", "label": "ANC visit 4", "dayOffset": 84, "tier": 3 },
+        { "id": "anc5", "label": "ANC visit 5", "dayOffset": 98, "tier": 3 },
+        { "id": "anc6", "label": "ANC visit 6", "dayOffset": 112, "tier": 3 }
+      ]
+    }
+  ]
+}
