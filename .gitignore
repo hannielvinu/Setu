@@ -11,3 +11,6 @@ dist/
 SETU_PLAN.md
 .claude/
 /Setu_MedNova_*.pdf
+
+# Submission documents are kept locally, not in the repo
+docs/
