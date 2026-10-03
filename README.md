@@ -85,7 +85,7 @@ The **Outreach agent** (top of this page) runs the full call in Hindi or English
 ## How it works
 
 ```mermaid
-flowchart LR
+flowchart TD
   A[Appointment export / CSV] --> V
   B[Register photo] --> O[6-field OCR] --> V[Clerk verification]
   V --> E[Pathway rule engine<br/>clinician-owned]
