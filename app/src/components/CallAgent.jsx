@@ -14,7 +14,7 @@ const STAGES = [
   ["slot", "Resolve"],
   ["done", "Logged"],
 ];
-const STAGE_INDEX = { idle: -1, headsup: 0, greet: 1, verify: 2, ask: 3, askMore: 3, slot: 4, done: 5 };
+const STAGE_INDEX = { idle: -1, headsup: 0, greet: 1, verify: 2, ask: 3, slot: 4, done: 5 };
 const HI_REL = { son: "बेटा", daughter: "बेटी", wife: "पत्नी", husband: "पति", brother: "भाई" };
 const RESOLVING = ["money", "paperwork", "travel", "lodging", "family", "felt_better", "unaware"];
 
@@ -35,7 +35,7 @@ function speakLine(text, lang) {
 }
 
 export default function CallAgent({ state, dispatch, worklist, goTo }) {
-  const candidates = worklist.filter((r) => r.a.overdue);
+  const candidates = worklist.filter((r) => r.a.overdue && r.patient.status === "open" && r.patient.consent.call);
   const fallbackId = candidates.find((r) => r.patient.status === "open")?.patient.id || candidates[0]?.patient.id;
   const patientId = state.selectedPatientId && state.patients.some((p) => p.id === state.selectedPatientId) ? state.selectedPatientId : fallbackId;
   const patient = state.patients.find((p) => p.id === patientId);
@@ -79,7 +79,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
     [patient, a, lang]
   );
 
-  if (!patient) return <section><h1>No overdue patients</h1></section>;
+  if (!patient) return <section><h1>No overdue patients with outreach consent</h1></section>;
 
   const cg = patient.caregivers[0];
   const add = (m) => setMsgs((xs) => [...xs, ...(Array.isArray(m) ? m : [m])]);
@@ -96,7 +96,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
 
   function finish(outcome, barriers = found.barriers) {
     setStage("done");
-    const statusMap = { rebooked: "rebooked", emergency: "emergency", unverified: "unverified", handover: "handover", callback: "callback" };
+    const statusMap = { rebooked: "rebooked", emergency: "emergency", unverified: "unverified", handover: "handover", callback: "callback", opted_out: "opted_out" };
     dispatch({ type: "UPDATE_PATIENT", id: patient.id, patch: { status: statusMap[outcome] || "handover" } });
     dispatch({
       type: "LOG_CALL",
@@ -106,6 +106,12 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
   }
 
   function sendHeadsUp() {
+    if (!patient.consent.call || patient.status !== "open" || stage !== "idle") return;
+    if (!patient.consent.whatsapp && !patient.consent.sms) {
+      act("Heads-up skipped: no messaging consent");
+      setStage("headsup");
+      return;
+    }
     const viaWhatsApp = patient.consent.whatsapp;
     add({ from: "system", channel: viaWhatsApp ? "whatsapp" : "sms", template: true, sender: viaWhatsApp ? `${say({ en: "{hospital} Care Desk" }, "en")} (verified business)` : "AROGYA-CARE (DLT-registered sender)", text: say(SCRIPTS.headsup, lang, vars) });
     act(`Heads-up sent by ${viaWhatsApp ? "WhatsApp template" : "DLT-registered SMS"} · neutral sender name`);
@@ -115,13 +121,14 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
   }
 
   function placeCall() {
+    if (!patient.consent.call || patient.status !== "open" || stage !== "headsup") return;
     setChannel("voice");
     add({ from: "system", text: `Calling ${patient.phone} from the hospital care-desk number (verified caller ID) in the patient's preferred time window` });
     setTimeout(() => {
       add(prompt(SCRIPTS.greet));
       setStage("greet");
       dispatch({ type: "FUNNEL", key: "reached" });
-      act("Call connected");
+      act("Simulated call connected");
     }, 350);
   }
 
@@ -133,18 +140,29 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
       setPath((p) => [...p, "voice (dropped)"]);
       add({ from: "system", text: "Fallback: continuing as a WhatsApp flow with voice notes in the patient's language." });
       act("Fallback → WhatsApp voice-note flow");
-      if (lastPrompt) {
+      if (lastPrompt && identity !== "verified") {
         const text = say(lastPrompt.line, lang, { ...vars, ...(lastPrompt.extra || {}) });
         add({ from: "bot", text, channel: "whatsapp", voiceNote: true });
       }
-    } else {
+      if (identity === "verified") {
+        setIdentity("unverified");
+        setAttempts(0);
+        const text = say(SCRIPTS.verify, lang, vars);
+        setLastPrompt({ line: SCRIPTS.verify, extra: {} });
+        add({ from: "bot", text, channel: "whatsapp", voiceNote: true });
+        setStage("verify");
+      }
+    } else if (patient.consent.sms) {
       add({ from: "system", channel: "sms", text: "No WhatsApp on file → SMS sent: \"Please give a missed call to the care-desk number and we will call you back.\"" });
       act("Fallback → SMS with missed-call callback");
       finish("callback");
+    } else {
+      act("No consented messaging channel. Coordinator review queued.");
+      finish("handover");
     }
   }
 
-  function handleBarrierReply(text, isFollowUp) {
+  function handleBarrierReply(text) {
     const r = classify(text, state.emergencyCard);
     const nextFound = {
       barriers: [...new Set([...found.barriers, ...r.barriers])],
@@ -156,16 +174,19 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
     if (r.emergency.length) {
       add(botLine(SCRIPTS.emergency));
       dispatch({ type: "NURSE_ADD", item: { type: "emergency", patientId: patient.id, name: patient.name, regNo: patient.regNo, quote: text, matched: r.emergency.map((e) => e.label) } });
-      act(`EMERGENCY CARD MATCH: ${r.emergency.map((e) => e.label).join(", ")} → hospital script read, on-call nurse alerted`);
+      act(`EMERGENCY CARD MATCH: ${r.emergency.map((e) => e.label).join(", ")} → hospital script read, urgent review added to demo nurse queue`);
       finish("emergency", nextFound.barriers);
       return;
     }
 
     const out = [];
-    if (r.symptoms.length) {
-      out.push(botLine(SCRIPTS.symptom));
-      dispatch({ type: "NURSE_ADD", item: { type: "symptom", patientId: patient.id, name: patient.name, regNo: patient.regNo, quote: text } });
-      act("Symptom mentioned → logged verbatim to nurse queue (no advice given)");
+    if (r.symptoms.length || r.barriers.includes("fear")) {
+      out.push(botLine(r.symptoms.length ? SCRIPTS.symptom : SCRIPTS.barrier.fear));
+      dispatch({ type: "NURSE_ADD", item: { type: r.symptoms.length ? "symptom" : "concern", patientId: patient.id, name: patient.name, regNo: patient.regNo, quote: text } });
+      act("Nurse review queued. No slot offered.");
+      add(out);
+      finish("handover", nextFound.barriers);
+      return;
     }
 
     const fresh = r.barriers.slice(0, 3);
@@ -173,33 +194,24 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
     let lodgingSent = false;
     for (const b of fresh) {
       out.push(botLine(SCRIPTS.barrier[b]));
-      if ((b === "paperwork" || b === "money") && !checklistSent) {
+      if (patient.consent.whatsapp && (b === "paperwork" || b === "money") && !checklistSent) {
         checklistSent = true;
         out.push({ from: "system", channel: "whatsapp", sender: "Care Desk", list: WHATSAPP_TEMPLATES.paperwork, text: "Scheme document checklist" });
         act("WhatsApp: scheme document checklist sent; scheme help desk notified");
       }
-      if ((b === "travel" || b === "lodging") && !lodgingSent) {
+      if (patient.consent.whatsapp && (b === "travel" || b === "lodging") && !lodgingSent) {
         lodgingSent = true;
         out.push({ from: "system", channel: "whatsapp", sender: "Care Desk", list: WHATSAPP_TEMPLATES.lodging, text: "Low-cost stay near the hospital" });
         act("WhatsApp: lodging list shared");
       }
       if (b === "family") act("Caregiver-friendly slots offered; caregiver will be copied");
-      if (b === "fear") {
-        dispatch({ type: "NURSE_ADD", item: { type: "concern", patientId: patient.id, name: patient.name, regNo: patient.regNo, quote: text } });
-        act("Treatment worry → nurse callback requested");
-      }
+
     }
 
-    if (fresh.some((b) => RESOLVING.includes(b)) || (isFollowUp && !r.barriers.length && !r.symptoms.length)) {
+    if (fresh.some((b) => RESOLVING.includes(b))) {
       out.push(prompt(SCRIPTS.offerSlot));
       add(out);
       setStage("slot");
-      return;
-    }
-    if (r.symptoms.length && !fresh.length && !isFollowUp) {
-      out.push(prompt(SCRIPTS.askMore));
-      add(out);
-      setStage("askMore");
       return;
     }
     if (fresh.length) {
@@ -218,6 +230,13 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
     if (!text || stage === "done" || stage === "idle" || stage === "headsup") return;
     add({ from: "user", text, channel });
     setDraft("");
+
+    if (/^\s*(?:stop|opt out|बंद करें|बंद करो)[.!]?\s*$/i.test(text)) {
+      dispatch({ type: "UPDATE_PATIENT", id: patient.id, patch: { consent: { ...patient.consent, call: false, whatsapp: false, sms: false } } });
+      add(botLine(SCRIPTS.optOut));
+      finish("opted_out", []);
+      return;
+    }
 
     if (stage !== "greet" && HUMAN_REQUEST.some((k) => matches(text, k))) {
       add(botLine(SCRIPTS.human));
@@ -240,7 +259,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
 
     if (stage === "verify") {
       const cardLast4 = patient.regNo.replace(/\D/g, "").slice(-4);
-      const ok = (patient.birthYear && text.includes(String(patient.birthYear))) || text.replace(/\D/g, "").endsWith(cardLast4);
+      const ok = (patient.birthYear && text === String(patient.birthYear)) || (cardLast4.length === 4 && text === cardLast4);
       if (ok) {
         setIdentity("verified");
         dispatch({ type: "FUNNEL", key: "verified" });
@@ -259,19 +278,18 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
       return;
     }
 
-    if (stage === "ask") return handleBarrierReply(text, false);
-    if (stage === "askMore") return handleBarrierReply(text, true);
+    if (stage === "ask") return handleBarrierReply(text);
   }
 
   function book(slot) {
-    if (stage !== "slot") return;
+    if (stage !== "slot" || identity !== "verified" || patient.status !== "open" || slot.taken) return;
     const label = `${fmt(fromISO(slot.date), lang)}, ${slot.time}`;
     add({ from: "user", text: label, channel });
     dispatch({ type: "BOOK_SLOT", slotId: slot.id, patientId: patient.id });
     dispatch({ type: "FUNNEL", key: "rebooked" });
     add([
       botLine(SCRIPTS.booked, { slot: label }),
-      { from: "system", channel: "whatsapp", sender: "Care Desk", text: `Appointment confirmed: ${label} · ${slot.chair}. Reply 1 to confirm, 2 to change.` },
+      ...(patient.consent.whatsapp ? [{ from: "system", channel: "whatsapp", sender: "Care Desk", text: `Appointment confirmed: ${label} · ${slot.chair}.` }] : []),
       botLine(SCRIPTS.close),
     ]);
     act(`Booked ${slot.reason.toLowerCase()} slot ${label} (${slot.chair}); confirmation sent`);
@@ -282,7 +300,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
     ? [`हाँ, मैं ${patient.firstName} बोल ${patient.sex === "M" ? "रहा" : "रही"} हूँ`, cg ? `मैं ${cg.name} हूँ, ${patient.firstName} जी ${HI_REL[cg.relation] ? `${["son", "husband", "brother"].includes(cg.relation) ? "का" : "की"} ${HI_REL[cg.relation]}` : "के परिवार से"}` : null, "गलत नंबर है"]
     : [`Yes, this is ${patient.firstName}`, cg ? `I'm ${cg.name}, ${patient.firstName}'s ${cg.relation}` : null, "Wrong number, I don't know them"];
   const verifyChips = [patient.birthYear ? String(patient.birthYear) : patient.regNo.replace(/\D/g, "").slice(-4), "1990"];
-  const chips = stage === "greet" ? greetChips.filter(Boolean) : stage === "verify" ? verifyChips : stage === "ask" || stage === "askMore" ? QUICK_REPLIES[lang] : [];
+  const chips = stage === "greet" ? greetChips.filter(Boolean) : stage === "verify" ? verifyChips : stage === "ask" ? QUICK_REPLIES[lang] : [];
   const freeSlots = state.slots.filter((s) => !s.taken).slice(0, 4);
   const si = STAGE_INDEX[stage];
 
@@ -291,7 +309,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
       <div className="page-head">
         <div>
           <h1>Outreach agent</h1>
-          <p className="lede">Role-play the patient or caregiver: type a reply or tap a suggestion. The agent speaks only clinician-approved scripts.</p>
+          <p className="lede">Role-play the patient or caregiver: type a reply or tap a suggestion. Replies use fixed demo scripts. No calls or messages are sent.</p>
         </div>
         <div className="row gap">
           <select className="select" value={patient.id} onChange={(e) => dispatch({ type: "SELECT_PATIENT", id: e.target.value })} aria-label="Patient">
@@ -325,15 +343,15 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
           </dl>
           <h4>Consent on file</h4>
           <div className="chips">
-            <span className="chip ok">Voice call</span>
+            <span className="chip ok">{patient.consent.call ? "Voice call" : "Voice consent missing"}</span>
             <span className={`chip ${patient.consent.whatsapp ? "ok" : "off"}`}>WhatsApp</span>
             <span className="chip ok">SMS</span>
             <span className="chip">Neutral sender name</span>
           </div>
           <div className="controls">
-            <button className="btn" disabled={stage !== "idle"} onClick={sendHeadsUp}>1 · Send heads-up</button>
+            <button className="btn" disabled={stage !== "idle" || patient.status !== "open" || !patient.consent.call} onClick={sendHeadsUp}>1 · Send heads-up</button>
             <button className="btn" disabled={stage !== "headsup"} onClick={placeCall}>2 · Place call</button>
-            <button className="btn ghost" disabled={channel !== "voice" || !["greet", "verify", "ask", "askMore", "slot"].includes(stage)} onClick={dropCall}>Simulate call drop</button>
+            <button className="btn ghost" disabled={channel !== "voice" || !["greet", "verify", "ask", "slot"].includes(stage)} onClick={dropCall}>Simulate call drop</button>
           </div>
           {stage === "done" && (
             <div className="done-box">
@@ -390,7 +408,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
               ))}
             </div>
             <form className="row" onSubmit={(e) => { e.preventDefault(); onReply(draft); }}>
-              <input className="input" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={["greet", "verify", "ask", "askMore"].includes(stage) ? "Type as the patient or caregiver…" : "…"} disabled={!["greet", "verify", "ask", "askMore"].includes(stage)} />
+              <input className="input" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={["greet", "verify", "ask"].includes(stage) ? "Type as the patient or caregiver…" : "…"} disabled={!["greet", "verify", "ask"].includes(stage)} />
               <button className="btn" disabled={!draft.trim()}>Send</button>
             </form>
           </div>
@@ -399,7 +417,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
         <aside className="card pad">
           <h3>Agent panel</h3>
           <div className="kv"><span>Identity</span><span className={`status ${identity === "verified" ? "ok" : identity === "failed" ? "alert" : "warn"}`}>{identity === "verified" ? "Verified" : identity === "failed" ? "Failed: nothing disclosed" : "Not verified"}</span></div>
-          <div className="kv"><span>Disclosure</span><span>{identity === "verified" ? "Appointment details" : "Hospital + appointment only"}</span></div>
+          <div className="kv"><span>Disclosure</span><span>{identity === "verified" ? "Appointment details" : "No appointment details"}</span></div>
 
           <h4>What the agent heard</h4>
           {found.emergency.length > 0 && (

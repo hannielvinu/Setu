@@ -38,6 +38,18 @@ Setu is an **assistive** follow-up agent for hospital care teams. It helps them:
 
 A working prototype with **synthetic data** and a fictional hospital is live at **https://hannielvinu.github.io/Setu/**. A pilot with a partner hospital is planned, measuring return to care within 60–90 days.
 
+### Try the Round 2 workflow
+
+1. Open the live demo (no login). In **Worklist**, start outreach for **Shanti Devi**.
+2. Switch to **English**, send the heads-up, place the simulated call, select the patient reply, then select **1974**.
+3. Choose the reply about an expired Ayushman card and bus fare. Review the simulated checklist and lodging information, then select a slot.
+4. Go back to the worklist. **Rebooked** means attendance is still pending. Choose **Record attendance** and **Confirm simulated check-in** to record return to care separately. The barrier dashboard shows the confirmed return count.
+5. Reset and repeat with “I feel weak and the bus fare is too much.” The demo creates a nurse review and offers no slot. Wrong identity and STOP are useful additional controls.
+
+The browser runs the rules, sample scripts, queue, slot allocation and attendance workflow. The demo uses local browser storage and fictional records. Calls, SMS and WhatsApp are simulated, as are the OCR samples; CSV parsing and row review run locally. The public demo does not call a cloud AI model, contact a hospital or accept real patient records. Imports have no outreach consent by default.
+
+Run locally from `app` with `npm ci` and `npm run dev`. Run `npm test` for the engine and state checks and `npm run build` for the production bundle.
+
 ## Team
 
 **Team MedNova**: a doctor-led team of clinicians and technologists, building for Health-a-thon 2026.

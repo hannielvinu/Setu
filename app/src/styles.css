@@ -190,7 +190,7 @@ blockquote { margin: 10px 0 6px; font-size: 16px; padding: 8px 12px; background:
 .empty-card { color: var(--muted); }
 
 /* Dashboard */
-.kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 2px; }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 2px; }
 .kpi { padding: 14px 16px; display: flex; flex-direction: column; }
 .kpi-n { font-size: 30px; font-weight: 700; color: var(--teal-dark); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .kpi-l { font-size: 13px; color: var(--muted); }

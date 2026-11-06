@@ -60,7 +60,7 @@ export function rowToPatient(row, pathwaysById, today, idx) {
     completedSteps: completed,
     pastMisses: 0,
     caregivers: [],
-    consent: { call: true, whatsapp: true, sms: true, sender: "neutral" },
+    consent: { call: false, whatsapp: false, sms: false, sender: "neutral" },
     status: "open",
     source: `Register row verified ${t.toLocaleDateString("en-IN")}`,
   };

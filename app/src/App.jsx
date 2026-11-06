@@ -55,8 +55,8 @@ export default function App() {
           </div>
         </div>
         <div className="top-actions">
-          <span className="pill pill-warn">Synthetic demo data · fictional hospital</span>
-          <button className="btn ghost" onClick={() => { if (confirm("Reset the demo to its starting state?")) dispatch({ type: "RESET" }); }}>Reset demo</button>
+          <span className="pill pill-warn">Simulation · fictional records · no calls or messages sent</span>
+          <button className="btn ghost" onClick={() => { if (confirm("Reset the demo to its starting state?")) { dispatch({ type: "RESET" }); setTab("worklist"); } }}>Reset demo</button>
         </div>
       </header>
 
@@ -70,7 +70,7 @@ export default function App() {
       </nav>
 
       <main className="main">
-        {tab === "worklist" && <Worklist worklist={worklist} onStart={startOutreach} />}
+        {tab === "worklist" && <Worklist worklist={worklist} onStart={startOutreach} onConfirmAttendance={(id) => dispatch({ type: "CONFIRM_ATTENDANCE", id })} />}
         {tab === "call" && <CallAgent state={state} dispatch={dispatch} worklist={worklist} goTo={setTab} />}
         {tab === "verify" && <VerifyRegister state={state} dispatch={dispatch} goTo={setTab} />}
         {tab === "nurse" && <NurseQueue state={state} dispatch={dispatch} />}

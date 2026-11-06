@@ -36,13 +36,14 @@ export default function Dashboard({ state, worklist }) {
   funnel.flagged = HISTORY.funnel.flagged + state.calls.length;
   const fmax = funnel.flagged;
   const session = state.calls.length;
+  const returned = state.patients.filter((p) => p.status === "returned").length;
 
   return (
     <section>
       <div className="page-head">
         <div>
           <h1>Why patients drop out</h1>
-          <p className="lede">Synthetic 30-day baseline plus this demo session ({session} call{session === 1 ? "" : "s"} logged). A hospital would see its own data here.</p>
+          <p className="lede">Illustrative 30-day baseline and simulated activity, not pilot results. This session: {session} simulated call{session === 1 ? "" : "s"} logged.</p>
         </div>
       </div>
 
@@ -50,6 +51,7 @@ export default function Dashboard({ state, worklist }) {
         <div className="kpi card"><span className="kpi-n">{overdueNow}</span><span className="kpi-l">Overdue today</span></div>
         <div className="kpi card"><span className="kpi-n">{funnel.reached}</span><span className="kpi-l">Patients reached (30 days)</span></div>
         <div className="kpi card"><span className="kpi-n">{funnel.rebooked}</span><span className="kpi-l">Rebooked (30 days)</span></div>
+        <div className="kpi card"><span className="kpi-n">{returned}</span><span className="kpi-l">Returns confirmed (demo session)</span></div>
         <div className="kpi card"><span className="kpi-n">{Math.round((HISTORY.funnel.returned / HISTORY.funnel.flagged) * 100)}%</span><span className="kpi-l">Back in care within 30 days (baseline)</span></div>
         <div className="kpi card"><span className="kpi-n">{HISTORY.nurse.emergencies + state.session.emergencies}</span><span className="kpi-l">Emergency-card alerts</span></div>
       </div>

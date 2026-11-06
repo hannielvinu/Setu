@@ -38,7 +38,7 @@ export default function VerifyRegister({ state, dispatch, goTo }) {
       <div className="page-head">
         <div>
           <h1>Verify register rows</h1>
-          <p className="lede">Handwritten day-care registers are digitised to six non-clinical fields only. A clerk checks each row (about 10 seconds) before anyone is called.</p>
+          <p className="lede">Review six fields from a synthetic CSV or a sample OCR result. Approval adds the row to the worklist but does not grant outreach consent. Do not upload real patient records.</p>
         </div>
         <div className="row gap">
           <a className="btn ghost" href="./sample_register.csv" download>Sample CSV</a>
@@ -52,7 +52,7 @@ export default function VerifyRegister({ state, dispatch, goTo }) {
         <span className="chip alert">Never extracted: drugs, doses, diagnoses, clinical values</span>
         <span className="chip warn">Amber = low OCR confidence, needs a look</span>
       </div>
-      {flash && <div className="flash">{flash}</div>}
+      {flash && <div className="flash" role="status">{flash}</div>}
 
       {pending.length === 0 && <div className="card pad">All rows reviewed. <button className="btn small" onClick={() => goTo("worklist")}>Open worklist</button></div>}
 

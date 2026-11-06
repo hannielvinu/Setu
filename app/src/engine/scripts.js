@@ -7,28 +7,28 @@ export const HOSPITAL = { en: "Arogya Hospital", hi: "आरोग्य हॉ�
 
 export const SCRIPTS = {
   headsup: {
-    en: "{hospital} Care Desk: Namaste. We will call you in about 10 minutes from this number about an upcoming appointment for {first}. Reply STOP to opt out.",
-    hi: "{hospital} केयर डेस्क: नमस्ते। {first} जी की आने वाली अपॉइंटमेंट के बारे में हम लगभग 10 मिनट में इसी नंबर से कॉल करेंगे। बंद करने के लिए STOP लिखें।",
+    en: "{hospital} Care Desk: Namaste. We will call you from this number shortly. Reply STOP to opt out.",
+    hi: "{hospital} केयर डेस्क: नमस्ते। हम जल्द ही इस नंबर से कॉल करेंगे। बंद करने के लिए STOP लिखें।",
   },
   greet: {
-    en: "Namaste, this is the {hospital} care desk, calling for {first}-ji about an appointment. Am I speaking with {first}-ji, or a registered family member?",
-    hi: "नमस्ते, मैं {hospital} केयर डेस्क से बोल रही हूँ। {first} जी की अपॉइंटमेंट के बारे में कॉल है। क्या मेरी बात {first} जी या उनके रजिस्टर्ड परिवार के सदस्य से हो रही है?",
+    en: "Namaste, this is the {hospital} care desk. Am I speaking with the intended recipient or their registered caregiver?",
+    hi: "नमस्ते, मैं {hospital} केयर डेस्क से बोल रही हूँ। क्या मेरी बात उस व्यक्ति या उनके रजिस्टर्ड देखभालकर्ता से हो रही है जिनके लिए यह कॉल है?",
   },
   wrongPerson: {
-    en: "No problem. Please ask {first}-ji to call us back on this number. Thank you.",
-    hi: "कोई बात नहीं। कृपया {first} जी से इसी नंबर पर हमें वापस कॉल करने को कहें। धन्यवाद।",
+    en: "No problem. Please ask the intended recipient to call us back. Thank you.",
+    hi: "कोई बात नहीं। कृपया जिनके लिए यह कॉल है उनसे कहें कि हमें वापस कॉल करें। धन्यवाद।",
   },
   verify: {
-    en: "Thank you. To protect privacy, please tell me {first}-ji's year of birth, or the last 4 digits of the hospital card.",
-    hi: "धन्यवाद। गोपनीयता के लिए, कृपया {first} जी का जन्म वर्ष या हॉस्पिटल कार्ड के आखिरी 4 अंक बताइए।",
+    en: "Thank you. To protect privacy, please tell me the patient's year of birth, or the last 4 digits of the hospital card.",
+    hi: "धन्यवाद। गोपनीयता के लिए, कृपया मरीज़ का जन्म वर्ष या हॉस्पिटल कार्ड के आखिरी 4 अंक बताइए।",
   },
   verifyRetry: {
     en: "Sorry, that doesn't match our records. Could you try once more?",
     hi: "माफ़ कीजिए, यह हमारे रिकॉर्ड से मेल नहीं खाया। क्या आप एक बार फिर बता सकते हैं?",
   },
   verifyFailed: {
-    en: "I'm unable to confirm details on this call. Please ask {first}-ji to call us back on this number, or visit the help desk. Thank you.",
-    hi: "मैं इस कॉल पर जानकारी की पुष्टि नहीं कर पा रही हूँ। कृपया {first} जी से इसी नंबर पर वापस कॉल करने या हेल्प डेस्क पर आने को कहें। धन्यवाद।",
+    en: "I'm unable to confirm details on this call. Please call the care desk back or visit the help desk. Thank you.",
+    hi: "मैं इस कॉल पर जानकारी की पुष्टि नहीं कर पा रही हूँ। कृपया केयर डेस्क पर वापस कॉल करें या हेल्प डेस्क पर आएँ। धन्यवाद।",
   },
   ask: {
     en: "Thank you. {first}-ji's treatment visit was due on {due}. Is anything making it difficult to come?",
@@ -55,12 +55,16 @@ export const SCRIPTS = {
     hi: "ये अगले उपलब्ध ट्रीटमेंट स्लॉट हैं। आपके लिए कौन-सा ठीक रहेगा?",
   },
   booked: {
-    en: "Done. The visit is booked for {slot}. You will get a WhatsApp confirmation with the details.",
-    hi: "हो गया। विज़िट {slot} के लिए बुक हो गई है। आपको WhatsApp पर पूरी जानकारी मिल जाएगी।",
+    en: "Done. The visit is booked for {slot}.",
+    hi: "हो गया। विज़िट {slot} के लिए बुक हो गई है।",
   },
   close: {
     en: "Thank you, {first}-ji. Take care. If you need a person at any time, just say 'talk to a person'.",
     hi: "धन्यवाद, {first} जी। अपना ध्यान रखिए। किसी भी समय इंसान से बात करनी हो, तो बस 'किसी व्यक्ति से बात कराइए' कहिए।",
+  },
+  optOut: {
+    en: "Outreach has been stopped. You can contact the care desk if you need help.",
+    hi: "संपर्क बंद कर दिया गया है। मदद के लिए आप केयर डेस्क से संपर्क कर सकते हैं।",
   },
   human: {
     en: "Of course. I'm connecting you to our care coordinator now.",
@@ -68,20 +72,20 @@ export const SCRIPTS = {
   },
   barrier: {
     money: {
-      en: "I understand cost is a worry. I'm sending the list of documents for the free-treatment scheme, and our scheme help desk will call you.",
-      hi: "मैं समझती हूँ कि खर्च की चिंता है। मैं मुफ़्त इलाज योजना के ज़रूरी कागज़ों की सूची भेज रही हूँ, और हमारी योजना हेल्प डेस्क आपको कॉल करेगी।",
+      en: "I understand cost is a worry. The scheme help desk can explain available support.",
+      hi: "मैं समझती हूँ कि खर्च की चिंता है। योजना हेल्प डेस्क उपलब्ध सहायता की जानकारी दे सकती है।",
     },
     paperwork: {
-      en: "I'm sending a WhatsApp checklist of the exact documents needed for the Ayushman Bharat / state scheme, and the help-desk timing.",
-      hi: "मैं आयुष्मान भारत / राज्य योजना के लिए ज़रूरी कागज़ों की सूची और हेल्प डेस्क का समय WhatsApp पर भेज रही हूँ।",
+      en: "The scheme help desk can explain the required documents and check your eligibility.",
+      hi: "योजना हेल्प डेस्क ज़रूरी कागज़ों और पात्रता की जानकारी दे सकती है।",
     },
     travel: {
       en: "I understand the journey is long. I can book a slot that suits your travel, and share low-cost stay options near the hospital.",
       hi: "मैं समझती हूँ कि सफ़र लंबा है। मैं आपके सफ़र के हिसाब से स्लॉट बुक कर सकती हूँ, और हॉस्पिटल के पास कम खर्च में रुकने की जगहों की जानकारी भेज सकती हूँ।",
     },
     lodging: {
-      en: "I'm sharing the hospital's list of dharamshalas and low-cost stays nearby.",
-      hi: "मैं हॉस्पिटल के पास की धर्मशालाओं और कम खर्च में रुकने की जगहों की सूची भेज रही हूँ।",
+      en: "The care desk can help you find low-cost stays nearby.",
+      hi: "केयर डेस्क पास में कम खर्च में रुकने की जगह ढूँढने में मदद कर सकती है।",
     },
     family: {
       en: "I understand. I can book a weekend or early slot, and share the visit details with your registered caregiver.",

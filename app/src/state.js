@@ -2,7 +2,7 @@ import { makePatients, makeSlots, makeRegisterRows, PATHWAYS_BY_ID } from "./dat
 import { DEFAULT_EMERGENCY_CARD } from "./engine/classifier.js";
 import { rowToPatient } from "./engine/verify.js";
 
-const KEY = "setu-demo-v1";
+const KEY = "setu-demo-v2";
 export const TODAY = new Date();
 
 export function initialState() {
@@ -55,8 +55,23 @@ export function reducer(s, a) {
       return { ...s, patients: s.patients.map((p) => (p.id === a.id ? { ...p, ...a.patch } : p)) };
     case "FUNNEL":
       return { ...s, session: { ...s.session, funnel: bump(s.session.funnel, a.key) } };
-    case "BOOK_SLOT":
-      return { ...s, slots: s.slots.map((x) => (x.id === a.slotId ? { ...x, taken: true, patientId: a.patientId } : x)) };
+    case "BOOK_SLOT": {
+      const patient = s.patients.find((p) => p.id === a.patientId);
+      const slot = s.slots.find((x) => x.id === a.slotId && !x.taken);
+      if (!patient || patient.status !== "open" || !patient.consent.call || !slot) return s;
+      return {
+        ...s,
+        patients: s.patients.map((p) => p.id === patient.id ? { ...p, status: "rebooked", bookedSlotId: slot.id } : p),
+        slots: s.slots.map((x) => x.id === slot.id ? { ...x, taken: true, patientId: patient.id } : x),
+      };
+    }
+    case "CONFIRM_ATTENDANCE": {
+      const patient = s.patients.find((p) => p.id === a.id && p.status === "rebooked" && p.bookedSlotId);
+      const slot = patient && s.slots.find((x) => x.id === patient.bookedSlotId && x.patientId === patient.id);
+      if (!slot) return s;
+      const next = { ...patient, status: "returned", returnConfirmedAt: new Date().toISOString(), attendedVisitDate: slot.date };
+      return { ...s, patients: s.patients.map((p) => p.id === patient.id ? next : p) };
+    }
     case "NURSE_ADD": {
       const session = { ...s.session };
       if (a.item.type === "emergency") session.emergencies += 1;

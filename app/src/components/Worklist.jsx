@@ -4,18 +4,21 @@ import { fmt } from "../engine/dates.js";
 
 const STATUS = {
   open: ["Not contacted", ""],
-  rebooked: ["Rebooked", "ok"],
-  emergency: ["Emergency alert sent", "alert"],
+  rebooked: ["Rebooked · attendance pending", "ok"],
+  returned: ["Return confirmed", "ok"],
+  emergency: ["Urgent nurse review queued", "alert"],
   unverified: ["Could not verify", "warn"],
   handover: ["With coordinator", "warn"],
+  opted_out: ["Opted out", "warn"],
   callback: ["Awaiting callback", "warn"],
 };
 
-export default function Worklist({ worklist, onStart }) {
+export default function Worklist({ worklist, onStart, onConfirmAttendance }) {
   const [showAll, setShowAll] = useState(false);
+  const [confirming, setConfirming] = useState(null);
   const rows = showAll ? worklist : worklist.filter((r) => r.a.overdue);
   const overdue = worklist.filter((r) => r.a.overdue);
-  const open = overdue.filter((r) => r.patient.status === "open").length;
+  const open = overdue.filter((r) => r.patient.status === "open" && r.patient.consent.call).length;
 
   return (
     <section>
@@ -23,7 +26,7 @@ export default function Worklist({ worklist, onStart }) {
         <div>
           <h1>Today's follow-up worklist</h1>
           <p className="lede">
-            {overdue.length} patients are overdue for a planned visit; {open} not yet contacted. Ranked by operational priority, not clinical risk.
+            {overdue.length} patients are overdue for a planned visit; {open} ready for outreach. Ranked by operational priority, not clinical risk.
           </p>
         </div>
         <label className="toggle">
@@ -55,7 +58,7 @@ export default function Worklist({ worklist, onStart }) {
           </thead>
           <tbody>
             {rows.map(({ patient: p, a }, i) => {
-              const [label, cls] = STATUS[p.status] || STATUS.open;
+              const [label, cls] = p.status === "open" && !p.consent.call ? ["Consent missing", "warn"] : STATUS[p.status] || STATUS.open;
               return (
                 <tr key={p.id} className={a.overdue ? "" : "muted"}>
                   <td>{i + 1}</td>
@@ -78,9 +81,15 @@ export default function Worklist({ worklist, onStart }) {
                   <td>{p.distanceKm ? `${p.distanceKm} km` : "-"}</td>
                   <td><span className={`status ${cls}`}>{label}</span></td>
                   <td>
-                    {a.overdue && p.status === "open" && (
+                    {a.overdue && p.status === "open" && p.consent.call && (
                       <button className="btn small" onClick={() => onStart(p.id)}>Start outreach</button>
                     )}
+                  {p.status === "rebooked" && (confirming === p.id ? (
+                      <div className="row gap">
+                        <button className="btn small" onClick={() => { onConfirmAttendance(p.id); setConfirming(null); }}>Confirm simulated check-in</button>
+                        <button className="btn small ghost" onClick={() => setConfirming(null)}>Cancel</button>
+                      </div>
+                    ) : <button className="btn small ghost" onClick={() => setConfirming(p.id)}>Record attendance</button>)}
                   </td>
                 </tr>
               );

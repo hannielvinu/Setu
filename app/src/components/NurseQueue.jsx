@@ -30,7 +30,7 @@ export default function NurseQueue({ state, dispatch }) {
 
       <div className="card tint formula">
         <strong>How items arrive</strong>
-        <span>Emergency: a phrase matched the hospital's own emergency card, the script was read word for word and the on-call nurse was alerted. Symptom or worry: logged verbatim with no advice given. The agent never judges severity.</span>
+        <span>Emergency: a phrase matched the sample emergency card and created a simulated urgent review. Symptom or worry: logged verbatim with no advice given. The agent never judges severity.</span>
       </div>
 
       {open.length === 0 && <div className="card pad empty-card">No open items. Try the Outreach agent and reply “I have had fever since yesterday” or “I feel very weak and tired”.</div>}
@@ -45,7 +45,7 @@ export default function NurseQueue({ state, dispatch }) {
               <span className="sub">{n.regNo} · {ago(n.at)}</span>
             </div>
             <blockquote>“{n.quote}”</blockquote>
-            {n.matched && <div className="sub">Matched card item: {n.matched.join(", ")} (hospital emergency card). Emergency instruction already given on the call.</div>}
+            {n.matched && <div className="sub">Matched card item: {n.matched.join(", ")} (hospital emergency card). The demo displayed the sample emergency script.</div>}
             <div className="row gap wrap top-s">
               <button className="btn small" onClick={() => resolve(n.id, "Nurse called back")}>Called back</button>
               <button className="btn small ghost" onClick={() => resolve(n.id, "Asked patient to visit")}>Asked to visit</button>
@@ -53,7 +53,7 @@ export default function NurseQueue({ state, dispatch }) {
                 <option value="">Choose hospital leaflet…</option>
                 {LEAFLETS.map((l) => <option key={l}>{l}</option>)}
               </select>
-              <button className="btn small ghost" disabled={!leaflet[n.id]} onClick={() => resolve(n.id, `Nurse sent: ${leaflet[n.id]}`)}>Send leaflet</button>
+              <button className="btn small ghost" disabled={!leaflet[n.id]} onClick={() => resolve(n.id, `Nurse sent: ${leaflet[n.id]}`)}>Log simulated leaflet</button>
             </div>
           </article>
         );
