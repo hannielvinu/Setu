@@ -40,6 +40,8 @@ A working prototype with **synthetic data** and a fictional hospital is live at 
 
 ### Try the Round 2 workflow
 
+[Watch the narrated walkthrough](https://hannielvinu.github.io/Setu/round2-demo.mp4).
+
 1. Open the live demo (no login). In **Worklist**, start outreach for **Shanti Devi**.
 2. Switch to **English**, send the heads-up, place the simulated call, select the patient reply, then select **1974**.
 3. Choose the reply about an expired Ayushman card and bus fare. Review the simulated checklist and lodging information, then select a slot.
