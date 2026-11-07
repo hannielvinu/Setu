@@ -8,6 +8,7 @@ export const TODAY = new Date();
 export function initialState() {
   return {
     patients: makePatients(TODAY),
+    activity: [],
     slots: makeSlots(TODAY),
     registerRows: makeRegisterRows(TODAY).map((r) => ({ ...r, fields: { ...r.ocr }, confirmed: {}, status: "pending", source: "Register photo (OCR)" })),
     nurseQueue: [],
@@ -43,7 +44,7 @@ export function saveState(s) {
 
 const bump = (funnel, key, n = 1) => ({ ...funnel, [key]: (funnel[key] || 0) + n });
 
-export function reducer(s, a) {
+function reduceState(s, a) {
   switch (a.type) {
     case "RESET":
       return initialState();
@@ -95,6 +96,7 @@ export function reducer(s, a) {
       return { ...s, registerRows: s.registerRows.map((r) => (r.id === a.id ? { ...r, status: "rejected" } : r)) };
     case "APPROVE_ROW": {
       const row = s.registerRows.find((r) => r.id === a.id);
+      if (!row || row.status !== "pending") return s;
       const patient = rowToPatient(row.fields, PATHWAYS_BY_ID, TODAY, s.verifiedSeq);
       return {
         ...s,
@@ -108,4 +110,14 @@ export function reducer(s, a) {
     default:
       return s;
   }
+}
+
+export function reducer(s, a) {
+  const next = reduceState(s, a);
+  const tracked = ["UPDATE_PATIENT","SET_TIER","BOOK_SLOT","CONFIRM_ATTENDANCE","NURSE_ADD","NURSE_RESOLVE","LOG_CALL","APPROVE_ROW","REJECT_ROW","IMPORT_ROWS"];
+  if (next === s || !tracked.includes(a.type)) return next;
+  const patientId = a.patientId || a.item?.patientId || a.call?.patientId || a.id;
+  const patient = next.patients.find(p => p.id === patientId);
+  const at = new Date().toISOString();
+  return {...next,activity:[...(s.activity || []),{id:at+"-"+Math.random().toString(36).slice(2,7),at,type:a.type,patientName:patient?.name || a.call?.name || a.item?.name || "",outcome:a.call?.outcome || a.resolution || ""}].slice(-500)};
 }

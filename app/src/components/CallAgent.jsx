@@ -345,7 +345,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
           <div className="chips">
             <span className="chip ok">{patient.consent.call ? "Voice call" : "Voice consent missing"}</span>
             <span className={`chip ${patient.consent.whatsapp ? "ok" : "off"}`}>WhatsApp</span>
-            <span className="chip ok">SMS</span>
+            <span className={`chip ${patient.consent.sms ? "ok" : "off"}`}>SMS</span>
             <span className="chip">Neutral sender name</span>
           </div>
           <div className="controls">
@@ -428,7 +428,7 @@ export default function CallAgent({ state, dispatch, worklist, goTo }) {
             {found.barriers.map((b) => <span key={b} className="chip teal">{BARRIERS[b].label}</span>)}
             {!found.barriers.length && !found.symptoms.length && !found.emergency.length && <span className="sub">Nothing yet</span>}
           </div>
-          <p className="note">Demo classifier: transparent keyword rules (EN/HI). Production: Sarvam LLM restricted to the same fixed labels, with the emergency-card check always running alongside.</p>
+          <p className="note">Review the suggested barrier and next action. Detected symptoms and treatment concerns always go to the nurse queue.</p>
 
           <h4>Actions</h4>
           <ol className="log">

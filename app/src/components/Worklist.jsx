@@ -1,103 +1,30 @@
 import { useState } from "react";
 import { PATHWAYS_BY_ID } from "../data/demo.js";
 import { fmt } from "../engine/dates.js";
-
-const STATUS = {
-  open: ["Not contacted", ""],
-  rebooked: ["Rebooked · attendance pending", "ok"],
-  returned: ["Return confirmed", "ok"],
-  emergency: ["Urgent nurse review queued", "alert"],
-  unverified: ["Could not verify", "warn"],
-  handover: ["With coordinator", "warn"],
-  opted_out: ["Opted out", "warn"],
-  callback: ["Awaiting callback", "warn"],
-};
-
-export default function Worklist({ worklist, onStart, onConfirmAttendance }) {
-  const [showAll, setShowAll] = useState(false);
-  const [confirming, setConfirming] = useState(null);
-  const rows = showAll ? worklist : worklist.filter((r) => r.a.overdue);
-  const overdue = worklist.filter((r) => r.a.overdue);
-  const open = overdue.filter((r) => r.patient.status === "open" && r.patient.consent.call).length;
-
-  return (
-    <section>
-      <div className="page-head">
-        <div>
-          <h1>Today's follow-up worklist</h1>
-          <p className="lede">
-            {overdue.length} patients are overdue for a planned visit; {open} ready for outreach. Ranked by operational priority, not clinical risk.
-          </p>
-        </div>
-        <label className="toggle">
-          <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} /> Show patients not yet due
-        </label>
-      </div>
-
-      <div className="formula card tint">
-        <strong>Priority = days overdue × clinician tier × (1 + 0.5 × past misses)</strong>
-        <span>Tier is set per pathway step by the clinical team (Pathways & safety tab). No diagnosis, lab value or clinical data is used.</span>
-      </div>
-
-      <div className="table-wrap card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Patient</th>
-              <th>Pathway step</th>
-              <th>Due</th>
-              <th className="num">Days overdue</th>
-              <th className="num">Tier</th>
-              <th className="num">Past misses</th>
-              <th className="num">Priority</th>
-              <th>Distance</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(({ patient: p, a }, i) => {
-              const [label, cls] = p.status === "open" && !p.consent.call ? ["Consent missing", "warn"] : STATUS[p.status] || STATUS.open;
-              return (
-                <tr key={p.id} className={a.overdue ? "" : "muted"}>
-                  <td>{i + 1}</td>
-                  <td>
-                    <div className="strong">{p.name}</div>
-                    <div className="sub">
-                      {p.regNo}
-                      {p.age ? ` · ${p.age}${p.sex}` : ""} · {p.language === "hi" ? "Hindi" : "English"}
-                    </div>
-                  </td>
-                  <td>
-                    <div>{a.step.label}</div>
-                    <div className="sub">{PATHWAYS_BY_ID[p.pathwayId].name} · step {a.stepNumber}/{a.totalSteps}</div>
-                  </td>
-                  <td>{fmt(a.due)}</td>
-                  <td className="num">{a.overdue ? <span className="strong">{a.daysOverdue}</span> : "-"}</td>
-                  <td className="num"><span className={`tier t${a.tier}`}>{a.tier}</span></td>
-                  <td className="num">{p.pastMisses}</td>
-                  <td className="num"><span className="prio">{a.priority}</span></td>
-                  <td>{p.distanceKm ? `${p.distanceKm} km` : "-"}</td>
-                  <td><span className={`status ${cls}`}>{label}</span></td>
-                  <td>
-                    {a.overdue && p.status === "open" && p.consent.call && (
-                      <button className="btn small" onClick={() => onStart(p.id)}>Start outreach</button>
-                    )}
-                  {p.status === "rebooked" && (confirming === p.id ? (
-                      <div className="row gap">
-                        <button className="btn small" onClick={() => { onConfirmAttendance(p.id); setConfirming(null); }}>Confirm simulated check-in</button>
-                        <button className="btn small ghost" onClick={() => setConfirming(null)}>Cancel</button>
-                      </div>
-                    ) : <button className="btn small ghost" onClick={() => setConfirming(p.id)}>Record attendance</button>)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <p className="note">Data source per patient: hospital appointment export or a clerk-verified register row. Setu needs no EMR integration.</p>
-    </section>
-  );
+import Icon from "./Icon.jsx";
+import PatientPanel from "./PatientPanel.jsx";
+const STATUS={open:["Ready for outreach",""],rebooked:["Rebooked · attendance pending","ok"],returned:["Return confirmed","ok"],emergency:["Urgent nurse review queued","alert"],unverified:["Could not verify","warn"],handover:["With coordinator","warn"],opted_out:["Opted out","warn"],callback:["Awaiting callback","warn"]};
+export default function Worklist({worklist,onStart,onConfirmAttendance,dispatch}) {
+ const [showAll,setShowAll]=useState(false);
+ const [confirming,setConfirming]=useState(null);
+ const [search,setSearch]=useState("");
+ const [filter,setFilter]=useState("all");
+ const [selected,setSelected]=useState(null);
+ const [pathway,setPathway]=useState("all");
+ const overdue=worklist.filter(r=>r.a.overdue&&r.patient.status!=="returned");
+ const ready=overdue.filter(r=>r.patient.status==="open"&&r.patient.consent.call).length;
+ const returned=worklist.filter(r=>r.patient.status==="returned").length;
+ const booked=worklist.filter(r=>r.patient.status==="rebooked").length;
+ const rows=worklist.filter(r=>(showAll||r.a.overdue)&&(filter==="all"||r.patient.status===filter)&&(pathway==="all"||r.patient.pathwayId===pathway)&&(r.patient.name+" "+r.patient.regNo).toLowerCase().includes(search.toLowerCase().trim()));
+ const detail=worklist.find(r=>r.patient.id===selected);
+ const exportRows=()=>{const esc=v=>'"'+String(v??"").replaceAll('"','""')+'"';const csv=[["fictional_record","patient","registration","pathway_step","days_overdue","status"],...rows.map(({patient:p,a})=>["true",p.name,p.regNo,a.step.label,a.daysOverdue,p.status])].map(r=>r.map(esc).join(",")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="setu-fictional-worklist.csv";a.click();URL.revokeObjectURL(url);};
+ return <section className="worklist-page"><div className="page-head"><div><span className="eyebrow">EVERY FOLLOW-UP HAS A NEXT STEP</span><h1>Today's follow-up worklist</h1><p className="lede">Find the patients who need a conversation. Help remove what is keeping them away.</p></div><button className="btn ghost" onClick={exportRows}><Icon name="download" size={17}/> Export worklist</button></div>
+ <div className="worklist-stats">{[[overdue.length,"Overdue visits","clock"],[ready,"Ready for outreach","phone"],[booked,"Awaiting attendance","users"],[returned,"Returns confirmed","check"]].map(([v,label,icon],i)=><div className={"stat-block "+(i===3?"stat-return":"")} key={label}><span className="stat-icon"><Icon name={icon} size={19}/></span><div><strong>{v.toString().padStart(2,"0")}</strong><span>{label}</span></div></div>)}</div>
+ <div className="worklist-surface card"><div className="worklist-toolbar"><div className="filter-tabs" aria-label="Filter by status">{[["all","All patients"],["open","Needs outreach"],["rebooked","Rebooked"],["returned","Returned"]].map(([id,label])=><button className={id===filter?"active":""} key={id} aria-pressed={id===filter} onClick={()=>setFilter(id)}>{label}</button>)}</div><label className="search-field"><Icon name="search" size={17}/><input placeholder="Search name or ID" aria-label="Search patients" value={search} onChange={e=>setSearch(e.target.value)}/>{search&&<button className="icon-btn" aria-label="Clear search" onClick={()=>setSearch("")}><Icon name="close" size={15}/></button>}</label></div>
+ <div className="list-context"><span><span className="live-dot"/> {rows.length} fictional records <span className="context-divider">/</span> Sorted by operational priority</span><label><span className="sr-only">Filter by pathway</span><select value={pathway} onChange={e=>setPathway(e.target.value)} aria-label="Filter by pathway"><option value="all">All care pathways</option>{Object.values(PATHWAYS_BY_ID).map(p=><option value={p.id} key={p.id}>{p.name}</option>)}</select></label></div>
+ <div className="table-wrap"><table className="table patient-table"><thead><tr><th>Patient</th><th>Next care step</th><th>Due date</th><th>Overdue</th><th>Priority</th><th>Follow-up status</th><th><span className="sr-only">Action</span></th></tr></thead><tbody>{rows.map(({patient:p,a})=>{const [label,cls]=p.status==="open"&&!p.consent.call?["Consent missing","warn"]:STATUS[p.status]||STATUS.open;return <tr key={p.id} className={p.firstName==="Shanti"?"featured-patient":""}><td><button className="patient-name-button" onClick={()=>setSelected(p.id)}><span className="avatar">{p.name.split(" ").map(s=>s[0]).slice(0,2).join("")}</span><span><strong>{p.name}</strong><small>{p.regNo} · {p.language==="hi"?"Hindi":"English"}</small></span></button></td><td><strong>{a.step.label}</strong><div className="sub">{p.distanceKm?p.distanceKm+" km from hospital":"Distance not recorded"}</div></td><td>{fmt(a.due)}</td><td><span className={"overdue-count "+(p.status==="returned"?"completed-count":"")}>{a.daysOverdue}d</span></td><td><span className="prio">{a.priority}</span></td><td><span className={"status "+cls}>{label}</span></td><td>{a.overdue&&p.status==="open"&&p.consent.call&&<button className="btn small" onClick={()=>onStart(p.id)}>Start outreach <Icon name="arrow" size={14}/></button>}{p.status==="rebooked"&&(confirming===p.id?<div className="row gap"><button className="btn small" onClick={()=>{onConfirmAttendance(p.id);setConfirming(null);}}>Confirm simulated check-in</button><button className="btn small ghost" onClick={()=>setConfirming(null)}>Cancel</button></div>:<button className="btn small ghost" onClick={()=>setConfirming(p.id)}>Record attendance</button>)}{p.status==="returned"&&<span className="return-label"><Icon name="check" size={15}/> Checked in</span>}</td></tr>;})}</tbody></table></div>
+ {!rows.length&&<div className="empty-search"><Icon name="search" size={28}/><h3>No patients match these filters</h3><p>Try a different name, ID, status or care pathway.</p><button className="btn ghost" onClick={()=>{setSearch("");setFilter("all");setPathway("all");}}>Clear filters</button></div>}
+ <div className="worklist-table-footer"><label className="toggle"><input type="checkbox" checked={showAll} onChange={e=>setShowAll(e.target.checked)}/> Show patients not yet due</label><span>Fictional records · stored in this browser</span></div></div>
+ <details className="priority-explanation"><summary><Icon name="shield" size={15}/> How this list is prioritised</summary><p>Days overdue × clinician-set tier × (1 + 0.5 × past misses). This is an operational order, not a clinical risk score. No diagnosis, lab value or clinical data determines the ranking.</p></details>
+ {detail&&<PatientPanel key={detail.patient.id} record={detail} dispatch={dispatch} onClose={()=>setSelected(null)} onStart={onStart}/>}</section>;
 }

@@ -2,17 +2,7 @@ import { useRef, useState } from "react";
 import { PATHWAYS, PATHWAYS_BY_ID } from "../data/demo.js";
 import { TODAY } from "../state.js";
 import { FIELDS, LOW_CONFIDENCE, sanityIssues } from "../engine/verify.js";
-
-function parseCsv(text) {
-  const lines = text.trim().split(/\r?\n/).filter(Boolean);
-  const head = lines.shift().split(",").map((h) => h.trim().toLowerCase());
-  const col = (row, name) => row[head.indexOf(name)]?.trim() ?? "";
-  return lines.map((line, i) => {
-    const r = line.split(",");
-    const fields = { regNo: col(r, "reg_no"), name: col(r, "name"), phone: col(r, "phone"), pathwayId: col(r, "pathway"), step: col(r, "step_no"), date: col(r, "last_visit_date") };
-    return { id: `csv${Date.now()}${i}`, written: null, ocr: fields, fields, conf: {}, confirmed: {}, status: "pending", source: "CSV export" };
-  });
-}
+import { parseRegisterCsv } from "../engine/csv.js";
 
 export default function VerifyRegister({ state, dispatch, goTo }) {
   const [flash, setFlash] = useState("");
@@ -24,11 +14,11 @@ export default function VerifyRegister({ state, dispatch, goTo }) {
     const f = e.target.files?.[0];
     if (!f) return;
     try {
-      const rows = parseCsv(await f.text());
+      const rows = parseRegisterCsv(await f.text());
       dispatch({ type: "IMPORT_ROWS", rows });
       setFlash(`${rows.length} rows imported from ${f.name}. Review each row before it enters the worklist.`);
-    } catch {
-      setFlash("Could not read that file. Expected columns: reg_no,name,phone,pathway,step_no,last_visit_date");
+    } catch (error) {
+      setFlash(error.message || "Could not read that CSV.");
     }
     e.target.value = "";
   };

@@ -42,7 +42,7 @@ A working prototype with **synthetic data** and a fictional hospital is live at 
 
 [Watch the narrated walkthrough](https://hannielvinu.github.io/Setu/round2-demo.mp4).
 
-1. Open the live demo (no login). In **Worklist**, start outreach for **Shanti Devi**.
+1. Open the live demo (no login). Select **Experience a patient journey** to start the guided flow, or **Open workspace** to explore freely. Search for **Shanti Devi** and choose **Start outreach**.
 2. Switch to **English**, send the heads-up, place the simulated call, select the patient reply, then select **1974**.
 3. Choose the reply about an expired Ayushman card and bus fare. Review the simulated checklist and lodging information, then select a slot.
 4. Go back to the worklist. **Rebooked** means attendance is still pending. Choose **Record attendance** and **Confirm simulated check-in** to record return to care separately. The barrier dashboard shows the confirmed return count.
@@ -51,6 +51,10 @@ A working prototype with **synthetic data** and a fictional hospital is live at 
 The browser runs the rules, sample scripts, queue, slot allocation and attendance workflow. The demo uses local browser storage and fictional records. Calls, SMS and WhatsApp are simulated, as are the OCR samples; CSV parsing and row review run locally. The public demo does not call a cloud AI model, contact a hospital or accept real patient records. Imports have no outreach consent by default.
 
 Run locally from `app` with `npm ci` and `npm run dev`. Run `npm test` for the engine and state checks and `npm run build` for the production bundle.
+
+### A workspace you can explore
+
+Search and filter the worklist, inspect a patient, change demo consent, save coordinator notes, and export the filtered fictional records. The activity trail records local workflow events and can be exported. The barrier dashboard shows your current session by default; an optional illustrative baseline is explicitly labelled. All changes stay in this browser.
 
 ## Team
 

@@ -1,90 +1,21 @@
+import { useState } from "react";
 import { HISTORY } from "../data/demo.js";
 import { BARRIERS } from "../engine/classifier.js";
-
-const LABELS = { ...Object.fromEntries(Object.entries(BARRIERS).map(([k, v]) => [k, v.label])), other: "Other / unclear" };
-const FUNNEL = [
-  ["flagged", "Flagged overdue"],
-  ["headsUp", "Heads-up sent"],
-  ["reached", "Reached"],
-  ["verified", "Identity verified"],
-  ["barrierCaptured", "Barrier captured"],
-  ["rebooked", "Rebooked"],
-];
-const ACTION = {
-  paperwork: "Scheme paperwork is the top reason: consider extending help-desk hours or pre-filling scheme renewals at discharge.",
-  travel: "Travel is the top reason: consider grouping visits for distant patients and sharing transport-assistance options.",
-  money: "Cost is the top reason: route more patients to the scheme help desk at registration.",
-  family: "Caregiver availability is the top reason: consider early-morning or weekend day-care slots.",
-  felt_better: "'Felt better' is the top reason: strengthen the pathway explanation given at cycle 1.",
-  fear: "Treatment worry is the top reason: consider a nurse counselling call before each cycle.",
-  lodging: "Lodging is the top reason: expand the dharamshala partner list.",
-  unaware: "Unawareness is the top reason: add a confirmation call the day before each visit.",
-  other: "Many unclear reasons: review coordinator notes.",
-};
-
-export default function Dashboard({ state, worklist }) {
-  const counts = { ...HISTORY.barrierCounts };
-  for (const [k, v] of Object.entries(state.session.barrierCounts)) counts[k] = (counts[k] || 0) + v;
-  const total = Object.values(counts).reduce((a, b) => a + b, 0);
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  const max = sorted[0][1];
-  const top = sorted[0][0];
-
-  const overdueNow = worklist.filter((r) => r.a.overdue).length;
-  const funnel = { ...HISTORY.funnel };
-  for (const [k, v] of Object.entries(state.session.funnel)) funnel[k] = (funnel[k] || 0) + v;
-  funnel.flagged = HISTORY.funnel.flagged + state.calls.length;
-  const fmax = funnel.flagged;
-  const session = state.calls.length;
-  const returned = state.patients.filter((p) => p.status === "returned").length;
-
-  return (
-    <section>
-      <div className="page-head">
-        <div>
-          <h1>Why patients drop out</h1>
-          <p className="lede">Illustrative 30-day baseline and simulated activity, not pilot results. This session: {session} simulated call{session === 1 ? "" : "s"} logged.</p>
-        </div>
-      </div>
-
-      <div className="kpis">
-        <div className="kpi card"><span className="kpi-n">{overdueNow}</span><span className="kpi-l">Overdue today</span></div>
-        <div className="kpi card"><span className="kpi-n">{funnel.reached}</span><span className="kpi-l">Patients reached (30 days)</span></div>
-        <div className="kpi card"><span className="kpi-n">{funnel.rebooked}</span><span className="kpi-l">Rebooked (30 days)</span></div>
-        <div className="kpi card"><span className="kpi-n">{returned}</span><span className="kpi-l">Returns confirmed (demo session)</span></div>
-        <div className="kpi card"><span className="kpi-n">{Math.round((HISTORY.funnel.returned / HISTORY.funnel.flagged) * 100)}%</span><span className="kpi-l">Back in care within 30 days (baseline)</span></div>
-        <div className="kpi card"><span className="kpi-n">{HISTORY.nurse.emergencies + state.session.emergencies}</span><span className="kpi-l">Emergency-card alerts</span></div>
-      </div>
-
-      <div className="dash-grid">
-        <div className="card pad">
-          <h3>Barriers captured</h3>
-          <div className="bars">
-            {sorted.map(([k, v]) => (
-              <div key={k} className="bar-row">
-                <span className="bar-label">{LABELS[k]}</span>
-                <span className="bar-track"><span className={`bar-fill ${k === top ? "top" : ""}`} style={{ width: `${(v / max) * 100}%` }} /></span>
-                <span className="bar-val">{v} <em>{Math.round((v / total) * 100)}%</em></span>
-              </div>
-            ))}
-          </div>
-          <div className="insight"><strong>Suggested operational action</strong><span>{ACTION[top]}</span></div>
-        </div>
-
-        <div className="card pad">
-          <h3>Outreach funnel</h3>
-          <div className="bars">
-            {FUNNEL.map(([k, label]) => (
-              <div key={k} className="bar-row">
-                <span className="bar-label">{label}</span>
-                <span className="bar-track"><span className="bar-fill alt" style={{ width: `${(funnel[k] / fmax) * 100}%` }} /></span>
-                <span className="bar-val">{funnel[k]}</span>
-              </div>
-            ))}
-          </div>
-          <p className="note">Nurse queue baseline: {HISTORY.nurse.symptomNotes} symptom notes, median review {HISTORY.nurse.medianReviewSec}s per item (synthetic).</p>
-        </div>
-      </div>
-    </section>
-  );
+import Icon from "./Icon.jsx";
+const LABELS={...Object.fromEntries(Object.entries(BARRIERS).map(([k,v])=>[k,v.label])),other:"Other / unclear"};
+export default function Dashboard({state,worklist}) {
+ const [illustrative,setIllustrative]=useState(false);
+ const counts={...(illustrative?HISTORY.barrierCounts:{})};
+ for(const [k,v]of Object.entries(state.session.barrierCounts))counts[k]=(counts[k]||0)+v;
+ const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+ const max=sorted[0]?.[1]||1,total=Object.values(counts).reduce((a,b)=>a+b,0);
+ const overdue=worklist.filter(r=>r.a.overdue&&r.patient.status!=="returned").length;
+ const returned=state.patients.filter(p=>p.status==="returned").length;
+ const calls=state.calls.length;
+ const funnel=state.session.funnel;
+ return <section><div className="page-head"><div><span className="eyebrow">UNDERSTAND WHAT KEEPS PEOPLE AWAY</span><h1>Barrier dashboard</h1><p className="lede">Your demo session, as it happened. Rebooking and confirmed returns stay separate.</p></div><label className="toggle"><input type="checkbox" checked={illustrative} onChange={e=>setIllustrative(e.target.checked)}/> Add illustrative barrier baseline</label></div>
+ <div className="kpis">{[[overdue,"Outstanding overdue visits"],[calls,"Simulated outreach outcomes"],[funnel.rebooked,"Rebooked this session"],[returned,"Returns confirmed (demo session)"],[state.nurseQueue.length,"Nurse reviews created"],[state.nurseQueue.filter(n=>n.status==="open").length,"Nurse reviews open"]].map(([v,label])=><div className="kpi card" key={label}><span className="kpi-l">{label}</span><span className="kpi-n">{v}</span></div>)}</div>
+ <div className="dash-grid"><div className="card pad"><h3>What patients told the team</h3><p className="note">{illustrative?"Illustrative 30-day sample plus this session. These are not pilot results.":"Only barriers captured in your current demo session."}</p><div className="bars">{sorted.length?sorted.map(([k,v])=><div className="bar-row" key={k}><span className="bar-label">{LABELS[k]}</span><span className="bar-track"><span className="bar-fill" style={{width:v/max*100+"%"}}/></span><span className="bar-val">{v} <em>{Math.round(v/total*100)}%</em></span></div>):<div className="dashboard-empty"><Icon name="chart" size={32}/><strong>A clearer picture starts with a conversation</strong><p>Complete an outreach to see the barrier breakdown.</p></div>}</div>{sorted.length>0&&<div className="insight"><strong>Start with {LABELS[sorted[0][0]].toLowerCase()}</strong><span>Review these fictional cases with the coordinator and document the next practical action.</span></div>}</div>
+ <div className="card pad"><h3>From first contact to return</h3><div className="session-funnel">{[["reached","Simulated calls connected"],["verified","Identity verified"],["barrierCaptured","Barrier captured"],["rebooked","Visit rebooked"]].map(([k,label],i)=><div key={k}><span className="funnel-number">{i+1}</span><span>{label}</span><strong>{funnel[k]||0}</strong></div>)}<div className="funnel-return"><Icon name="check" size={18}/><span>Check-in confirmed</span><strong>{returned}</strong></div></div><p className="note">Counts are demo events, not measured patient outcomes. A hospital pilot must track attendance against its own records.</p></div></div>
+ <div className="card pad"><h3>Recent outreach outcomes</h3>{state.calls.length?<ul className="recent-outcomes">{state.calls.slice(0,8).map((c,i)=><li key={i}><span className="avatar">{c.name?.split(" ").map(s=>s[0]).slice(0,2).join("")}</span><div><strong>{c.name}</strong><p>{c.barriers.map(b=>LABELS[b]||b).join(" · ")||"No barrier disclosed"}</p></div><span className="status">{c.outcome.replaceAll("_"," ")}</span></li>)}</ul>:<p className="note">No completed outreach yet. Start with Shanti in the follow-up worklist.</p>}</div></section>;
 }
